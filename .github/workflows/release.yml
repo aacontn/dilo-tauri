@@ -73,9 +73,10 @@ jobs:
       platform: ${{ matrix.platform }}
       target: ${{ matrix.target }}
       build-args: ${{ matrix.args }}
-      # Firma macOS con el certificado autofirmado estable "Dilo Signing"
-      # (identidad TCC constante: Accesibilidad sobrevive actualizaciones).
-      # No es Developer ID — Gatekeeper sigue igual; eso lo cubre install.sh.
+      # Firma macOS con la identidad que haya en el secret APPLE_CERTIFICATE:
+      # Developer ID Application (hardened runtime + notarización con los
+      # secrets APPLE_API_*) o, como respaldo, el autofirmado "Dilo Signing"
+      # (sin notarizar; Gatekeeper lo cubre install.sh). Ver build.yml.
       sign-binaries: true
       asset-prefix: "dilo"
       upload-artifacts: false

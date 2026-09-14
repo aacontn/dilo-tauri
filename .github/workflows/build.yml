@@ -521,17 +521,57 @@ jobs:
       - name: Use imported signing identity (macOS)
         if: contains(inputs.platform, 'macos') && inputs.sign-binaries
         run: |
-          jq --arg id "$CERT_ID" '.bundle.macOS.signingIdentity = $id' \
+          # Hardened runtime solo con Developer ID real: es requisito de la
+          # notarización, y sobre el autofirmado activaría library validation
+          # contra dylibs de otro "Team" (ver el check de adhoc+runtime abajo).
+          if [[ "$CERT_ID" == *"Developer ID Application"* ]]; then
+            HARDENED=true
+          else
+            HARDENED=false
+          fi
+          echo "hardenedRuntime=$HARDENED"
+          jq --arg id "$CERT_ID" --argjson hr "$HARDENED" \
+            '.bundle.macOS.signingIdentity = $id | .bundle.macOS.hardenedRuntime = $hr' \
             src-tauri/tauri.conf.json > /tmp/tauri.conf.json
           mv /tmp/tauri.conf.json src-tauri/tauri.conf.json
+
+      # Notarización con App Store Connect API key (Team key, rol Developer).
+      # Las vars se exportan SOLO si los tres secrets existen: tauri trata
+      # "definida pero vacía" como definida e intenta notarizar con credenciales
+      # vacías, y eso rompe el build. Sin secrets (o con el autofirmado) se
+      # firma sin notarizar, como hasta ahora.
+      - name: Notarization credentials (macOS)
+        if: contains(inputs.platform, 'macos') && inputs.sign-binaries
+        env:
+          APPLE_API_ISSUER_SECRET: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_SECRET: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_P8_SECRET: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          if [[ "$CERT_ID" != *"Developer ID Application"* ]]; then
+            echo "Identidad sin Developer ID: no se notariza"
+            exit 0
+          fi
+          if [ -z "$APPLE_API_ISSUER_SECRET" ] || [ -z "$APPLE_API_KEY_SECRET" ] || [ -z "$APPLE_API_KEY_P8_SECRET" ]; then
+            echo "::warning::Developer ID presente pero faltan APPLE_API_ISSUER / APPLE_API_KEY / APPLE_API_KEY_P8 — se firma sin notarizar"
+            exit 0
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY_SECRET}.p8"
+          printf '%s\n' "$APPLE_API_KEY_P8_SECRET" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          {
+            echo "APPLE_API_ISSUER=$APPLE_API_ISSUER_SECRET"
+            echo "APPLE_API_KEY=$APPLE_API_KEY_SECRET"
+            echo "APPLE_API_KEY_PATH=$KEY_PATH"
+          } >> "$GITHUB_ENV"
+          echo "Notarización habilitada (key $APPLE_API_KEY_SECRET)"
 
       # Dos variantes del mismo paso: el bundler de macOS trata APPLE_CERTIFICATE
       # "definida pero vacía" como definida e intenta importarla al keychain
       # (SecKeychainItemImport falla). Sin firma, las vars no deben existir.
-      # La variante firmada es solo-macOS y lleva únicamente las vars del
-      # certificado estable; al comprar el Developer ID de Apple, reponer aquí
-      # APPLE_ID / APPLE_ID_PASSWORD / APPLE_TEAM_ID (notarización) — vacías
-      # gatillan intentos de notarizar con credenciales vacías y rompen el build.
+      # La variante firmada es solo-macOS. La notarización no se pasa acá:
+      # el paso "Notarization credentials" exporta APPLE_API_ISSUER /
+      # APPLE_API_KEY / APPLE_API_KEY_PATH a GITHUB_ENV únicamente cuando los
+      # secrets existen — vacías gatillan intentos de notarizar y rompen el build.
       # OJO: no pasar APPLE_CERTIFICATE aquí — con esa var presente, tauri
       # importa el cert a un keychain temporal propio (fuera de la lista de
       # búsqueda y sin nuestro trust) y "failed to resolve signing identity".

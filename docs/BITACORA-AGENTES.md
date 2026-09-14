@@ -3,6 +3,32 @@
 > Entradas nuevas arriba. Hecho, próximo paso, cuidado y estado Git; el
 > detalle fino vive en Git y en `docs/superpowers/specs/`.
 
+## 2026-09-14 · Norte (Claude)
+
+- **Hecho:** cañería de **Developer ID + notarización** dejada lista, sin
+  commit. (1) `build.yml`: hardened runtime se enciende solo si la identidad
+  importada es "Developer ID Application"; paso nuevo "Notarization
+  credentials" que exporta `APPLE_API_ISSUER/APPLE_API_KEY/APPLE_API_KEY_PATH`
+  a `GITHUB_ENV` únicamente si existen los tres secrets (vacías rompen el
+  build). (2) `Entitlements.plist`: `automation.apple-events` (notes.rs usa
+  osascript → Apple Notas) y `cs.disable-library-validation` (dylibs de ort/
+  whisper en Frameworks). (3) CSR generado en
+  `../dilo-signing/developer-id/` (llave privada local, fuera del repo).
+- **Próximo paso:** Alfonso sube el CSR en developer.apple.com (Developer ID
+  Application, solo el Account Holder puede) y genera una Team key de App
+  Store Connect (rol Developer). Con el `.cer` y el `.p8`: armar el `.p12`
+  con la cadena intermedia, subir secrets `APPLE_CERTIFICATE`,
+  `APPLE_CERTIFICATE_PASSWORD`, `APPLE_API_ISSUER`, `APPLE_API_KEY`,
+  `APPLE_API_KEY_P8`, despachar `test-macos-signing.yml` y verificar con
+  `spctl --assess` + `codesign -dv`. Recién ahí sacar el `xattr -cr` del README.
+- **Cuidado:** al cambiar de "Dilo Signing" a Developer ID cambia la identidad
+  TCC: los usuarios (y Alfonso) tendrán que **re-otorgar Accesibilidad y
+  micrófono una vez**. `find-identity` en el runner solo marca válido el
+  Developer ID si la intermedia "Developer ID Certification Authority" está en
+  el keychain — meterla dentro del p12.
+- **Git:** main == origin/main + 4 archivos modificados sin commit
+  (build.yml, release.yml, Entitlements.plist, esta bitácora).
+
 ## 2026-08-28 (4) · Norte (Claude)
 
 - **Hecho:** **v0.3.2 publicada e instalada**. El tile fantasma del Dock que
