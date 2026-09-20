@@ -192,8 +192,9 @@ no se publique. Nada de reuniones ni de voz más allá de los cimientos de §5.
    Se sabe en diez minutos (§Verificación 1).
 2. **Talkify tiene un solo autor y seis semanas de vida.** Mitigación: es un
    fork, no una dependencia; si upstream muere, el código queda.
-3. **El sandbox y el tap de audio del sistema.** Plausible, no confirmado.
-   Si no funciona, App Store = sólo dictado. No mata el plan.
+3. ~~**El sandbox y el tap de audio del sistema.** Plausible, no confirmado.~~
+   **Confirmado 2026-09-20: funciona.** El riesgo que queda es el pegado y
+   el atajo en sandbox, pendientes del clic de Alfonso en TCC.
 4. **Dos targets es trabajo real** (dos licencias, dos updaters). Se paga una
    vez al inicio; retrofitear después cuesta meses.
 5. **Mac mini / monitores externos sin notch** son el 80 % del uso de
@@ -217,10 +218,39 @@ Ninguna tarea del plan se ejecuta hasta tener estos cuatro números:
 2. **Build sandboxed de Talkify.** Activar App Sandbox en el target, firmar,
    y probar: ¿pega en Cursor y en el terminal? ¿el atajo global responde?
    ¿`AudioHardwareCreateProcessTap` entrega audio del sistema con el
-   entitlement `audio-input`? Tres sí/no.
-3. **Repetir `bun scripts/probes/gc-probe.ts`** (quedó en 503 el 2026-08-27):
-   formato de la diarización de Gemini y comportamiento con 2 y 5+ hablantes
-   en español. Desbloquea el spec de v2.
+   entitlement `audio-input`? Tres sí/no. **Hecho 2026-09-20 (parcial):**
+   - **Tap de audio del sistema en sandbox: SÍ.** Con `app-sandbox` +
+     `device.audio-input` entrega audio real (239.104 frames, pico 0,59;
+     control en silencio 0,0), idéntico al build sin sandbox, **sin prompt de
+     TCC**. Esto **tumba el supuesto** de que App Store quedaría sólo-dictado:
+     el notetaker puede ir al App Store. Trampa: el tap devuelve silencio si
+     el binario se lanza desde el terminal (TCC atribuye al proceso
+     responsable); con `open -a` entrega audio.
+   - **Pegar y atajo global: pendiente de clic de Alfonso.** El portapapeles
+     funciona en sandbox; el Cmd+V sintético y `CGEvent.tapCreate` fallan
+     igual con y sin sandbox porque faltan Accesibilidad e Input Monitoring,
+     que solo un humano concede. `Talkify-sandboxed.app` (bundle
+     `com.tgomareli.Talkify.sandboxed`) queda en `/Volumes/SSD2/scratch/talkify/`
+     para aprobarlos y probar pegado en Cursor y terminal.
+   - Dato que sí distingue al sandbox: AX hacia otra app devuelve `-25204
+     CannotComplete` sandboxed vs `-25211 APIDisabled` sin sandbox. El
+     sandbox **no rompe la compilación de una línea** de Talkify: todo lo que
+     se cae, se cae en ejecución — por eso la capa de capacidades (§4) tiene
+     que probarse en runtime, no confiar en el compilador.
+   - Inventario de los usos de AX/CGEvent/pasteboard, archivo:línea, en
+     `docs/superpowers/spikes/2026-09-20-spike-1-2-talkify-sandbox.md`.
+3. **Repetir el probe de diarización de Gemini** (quedó en 503 el
+   2026-08-27). **Hecho 2026-09-20 13:31** con `scripts/probes/gc-probe.py`
+   (port a Python; la key vive en el Llavero). Resultado: **compuerta
+   abierta.** Diarización estructural, no en el texto: una `part` por turno
+   con `audioTranscription {text, speakerLabel:"spk:N", words[{word,
+   startOffset, endOffset}]}`, timestamps por palabra. `audio/wav` aceptado,
+   200 en 3–3,6 s por 20 s de audio. Con 2 voces: 2 hablantes exactos, texto
+   perfecto. Con 5 voces: detectó **4** — fundió dos voces femeninas
+   parecidas. **Trampa nueva:** requests de WAV sobre ~654–688 KB devuelven
+   **403 `SERVICE_DISABLED`** (culpa al proyecto, pero es tamaño): el plan de
+   v2 tiene que trocear el audio y asumir que voces parecidas se funden.
+   Detalle en `docs/superpowers/spikes/2026-09-20-spike-3-gemini-diarizacion.md`.
 4. **Una reunión real de Alfonso por dos flujos** (mic + tap), con WAV a
    disco, transcrita por SpeechAnalyzer flujo por flujo. ¿Se pierde algo?
    ¿Cuánto tarda el parcial en aparecer?
