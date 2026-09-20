@@ -13,6 +13,9 @@ regenerable).
 Uso:
     python3 scripts/probes/gc-probe.py              # genera audios y prueba
     python3 scripts/probes/gc-probe.py --solo-audio # solo genera los audios
+    python3 scripts/probes/gc-probe.py --solo 5     # solo el audio de 5 voces
+
+Cada respuesta cruda queda en `<scratch>/respuesta-<audio>.json` para el registro.
 """
 
 import json
@@ -248,6 +251,13 @@ def probar(key, etiqueta, ruta, segs):
         status, datos, crudo, tardo = pedir(key, ruta)
     print("HTTP %s en %.2f s" % (status, tardo))
 
+    registro = os.path.join(
+        SCRATCH, "respuesta-%s.json" % os.path.basename(ruta).replace(".wav", "")
+    )
+    with open(registro, "w") as f:
+        f.write(crudo)
+    print("→ respuesta cruda guardada en %s" % registro)
+
     if status != 200 or datos is None:
         print("→ ¿aceptó audio/wav?: NO se pudo determinar (la llamada falló)")
         print("→ error crudo: %s" % crudo[:600])
@@ -279,6 +289,31 @@ def probar(key, etiqueta, ruta, segs):
     )
     print("¿estructura con tiempos/hablantes?: %s"
           % (", ".join(pistas) if pistas else "ninguna clave de ese tipo"))
+
+    turnos = []
+    for cand in datos.get("candidates", []):
+        for parte in cand.get("content", {}).get("parts", []):
+            at = parte.get("audioTranscription")
+            if not at:
+                continue
+            palabras = at.get("words") or []
+            turnos.append(
+                (
+                    at.get("speakerLabel", "(sin etiqueta)"),
+                    palabras[0].get("startOffset") if palabras else "?",
+                    palabras[-1].get("endOffset") if palabras else "?",
+                    len(palabras),
+                    at.get("text", ""),
+                )
+            )
+    if turnos:
+        distintos = sorted({t[0] for t in turnos})
+        print("turnos devueltos: %d · hablantes distintos: %d (%s)"
+              % (len(turnos), len(distintos), ", ".join(distintos)))
+        for etq, ini, fin, n, txt in turnos:
+            print("  %-8s %6s→%-8s %3d palabras  %s"
+                  % (etq, ini, fin, n, txt[:60]))
+
     print("\n--- Texto transcrito ---")
     print(texto if texto else "(vacío)")
     print("\n--- JSON crudo (primeros 3000 caracteres) ---")
@@ -292,6 +327,11 @@ def main():
     if solo_audio:
         print("\nSolo audio: no se llamó a la API.")
         return
+    if "--solo" in sys.argv:
+        cual = sys.argv[sys.argv.index("--solo") + 1]
+        audios = [a for a in audios if a[0].startswith(cual)]
+        if not audios:
+            sys.exit("--solo acepta 2 o 5 (por cantidad de hablantes).")
     for etiqueta, ruta, segs in audios:
         probar(key, etiqueta, ruta, segs)
     print("\nProbe de diarización terminado.")

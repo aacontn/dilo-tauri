@@ -40,17 +40,41 @@ security add-generic-password -a dilo -s dilo-gemini-api-key -U -w   # pide la k
 python3 scripts/probes/gc-probe.py
 ```
 
-`--solo-audio` regenera los WAV sin llamar a la API ni necesitar la key. Borrar
-los WAV y volver a correr los regenera.
+`--solo-audio` regenera los WAV sin llamar a la API ni necesitar la key;
+`--solo 2` / `--solo 5` corren un audio solo. Cada respuesta cruda queda en
+`<scratch>/respuesta-<audio>.json`.
 
-## Resultados
+## Resultados (2026-09-20, 13:31–13:34 -03)
 
-**Pendiente: falta la key en el Llavero.** Verificado hasta donde se puede sin
-ella: los dos audios se generan bien (`wave` confirma 1 canal / 16 bits /
-16 kHz) y el script corre limpio hasta el chequeo de la key, que sale con
-código 2 y el mensaje correcto. Las tres preguntas del spec —forma de la
-respuesta de diarización, si `audio/wav` basta o exige FLAC, y el
-comportamiento con 2 y 5 hablantes— siguen sin responder.
+**La compuerta se abre.** Evidencia cruda en
+`/Volumes/SSD2/scratch/dilo-probes/`: `respuesta-reunion-2.json`,
+`respuesta-reunion-5-20s.json`, `respuesta-reunion-5.json` (el 403) y
+`salida-2026-09-20.txt`.
 
-Siguiente paso: agregar la key al Llavero, correr el probe y pegar acá la salida
-de los dos audios. El plan de reuniones sigue sin poder ejecutarse hasta eso.
+**1 · Formato.** No hay etiquetas de hablante dentro del texto: la diarización
+es **estructural**. `candidates[0].content.parts[]` trae **una part por turno**,
+cada una con `text` y `audioTranscription {text, speakerLabel, words[]}`, donde
+`speakerLabel` es `"spk:0"`, `"spk:1"`… y cada `word` es
+`{word, startOffset, endOffset}` en segundos con string tipo `"12.600s"`.
+Timestamps **por palabra**, y el rango del turno sale del primer y último word.
+La salida es verbatim con puntuación (confirma que `mode` no aplica acá).
+
+**2 · `audio/wav`.** Aceptado: HTTP 200 con `inline_data` `audio/wav` directo,
+3,0–3,6 s por audio de 20 s. **No exige FLAC.**
+
+**3 · Hablantes.** Con **2 voces** (20,4 s, 5 turnos): 2 etiquetas exactas,
+turnos bien cortados y texto perfecto salvo puntuación. Con **5 voces** (recorte
+de 20 s, 5 turnos): 5 turnos pero **4 etiquetas** — fundió a las dos voces
+femeninas (Mónica es_ES y Paulina es_MX) en `spk:0`; un error de texto
+("va bien, cerramos" → "va de cerramos"). O sea: separa bien turnos y timbres
+distintos, y confunde voces parecidas.
+
+**Trampa nueva — 403 mentiroso por tamaño.** El archivo de 5 voces completo
+(21,5 s, 687.632 bytes) devolvió **403 `PERMISSION_DENIED` / `SERVICE_DISABLED`**
+("Gemini API has not been used in project…"), dos veces, con 200 de la misma key
+y el mismo endpoint antes y después. Recortado a 20 s (640.044 bytes) pasa a
+200. El de 2 voces (654.070 bytes) también pasa. El umbral está entre 654 KB y
+688 KB de WAV (~872–917 KB ya en base64): el envelope culpa al proyecto, pero es
+el tamaño del request. Hay que confirmarlo y **el cliente no debe creerle al 403**.
+También aparecieron **429** al encadenar llamadas seguidas; el reintento a 8 s
+del probe las absorbe.
