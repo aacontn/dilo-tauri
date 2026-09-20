@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "creado": "2026-09-20",
+  "proposito": "Set de evaluacion del spike 5 (Decider / Laya multilingue). Mide si un modelo de decisiones tipadas elige bien el modo de Dilo a partir de un dictado en espanol chileno mas la app al frente.",
+  "advertencia": "Dictados sinteticos escritos a mano para el spike. No hay datos personales ni contenido real de nadie. No es historial de uso.",
+  "modos": {
+    "codigo": {
+      "nombre": "Codigo",
+      "descripcion": "Instruccion o prompt dirigido a un agente de programacion (Cursor, Claude Code): pedir cambios en el codigo, refactors, tests, componentes."
+    },
+    "correo": {
+      "nombre": "Correo",
+      "descripcion": "Mensaje de correo formal para un cliente o colega: saludo, cuerpo redactado y cierre; trato de usted."
+    },
+    "chat": {
+      "nombre": "Chat",
+      "descripcion": "Mensaje corto e informal para Slack o WhatsApp: avisos al equipo, preguntas rapidas, confirmaciones."
+    },
+    "nota": {
+      "nombre": "Nota",
+      "descripcion": "Nota rapida para uno mismo: recordatorios, ideas, pendientes, observaciones. Nadie mas la lee."
+    },
+    "terminal": {
+      "nombre": "Terminal",
+      "descripcion": "Comando de shell o instruccion para ejecutar en el terminal: git, archivos, procesos, paquetes, discos."
+    }
+  },
+  "dictados": [
+    { "id": "codigo-01", "modo": "codigo", "app": "Cursor", "texto": "ya, necesito que me refactorices el componente de la barra lateral pa que use el store nuevo de zustand, y de paso sacale los console log que quedaron dando vuelta" },
+    { "id": "codigo-02", "modo": "codigo", "app": "Cursor", "texto": "oye, agregame un test de integracion pal endpoint de login, que cubra el caso del token vencido, cachai" },
+    { "id": "codigo-03", "modo": "codigo", "app": "Cursor", "texto": "mira, el hook este de use audio esta quedando muy largo, separalo en dos, uno que grabe y otro que haga el resample a dieciseis kilohertz" },
+    { "id": "codigo-04", "modo": "codigo", "app": "Cursor", "texto": "hazme un componente de card en swift ui con la esquina redondeada y una sombra suave, que reciba titulo y subtitulo como parametros" },
+    { "id": "codigo-05", "modo": "codigo", "app": "Cursor", "texto": "eh, revisa el reducer de historial, creo que esta mutando el estado directo en vez de devolver una copia, arreglalo por favor" },
+    { "id": "codigo-06", "modo": "codigo", "app": "Cursor", "texto": "necesito que migres todos los fetch a tanstack query, pero empieza por la pantalla de settings no mas, el resto lo vemos despues" },
+    { "id": "codigo-07", "modo": "codigo", "app": "Cursor", "texto": "ponle types de verdad a este archivo, esta lleno de any y el eslint esta llorando en cada linea" },
+    { "id": "codigo-08", "modo": "codigo", "app": "Cursor", "texto": "agregame manejo de error cuando la api devuelve cuatrocientos veintinueve, con retry exponencial, maximo tres intentos y despues que falle no mas" },
+
+    { "id": "correo-01", "modo": "correo", "app": "Mail", "texto": "Estimado Rodrigo, junto con saludar, le escribo para confirmar la reunion del proximo martes a las diez de la manana en nuestras oficinas. Quedo atento a su confirmacion." },
+    { "id": "correo-02", "modo": "correo", "app": "Mail", "texto": "Estimada Carolina, adjunto la cotizacion actualizada por el desarrollo del sitio, con el descuento que conversamos por telefono. La propuesta tiene una validez de treinta dias corridos." },
+    { "id": "correo-03", "modo": "correo", "app": "Mail", "texto": "Hola Marcela, te escribo para informarte que el despliegue quedo programado para el viernes en la noche, fuera del horario de atencion. Cualquier duda me avisas y lo coordinamos." },
+    { "id": "correo-04", "modo": "correo", "app": "Mail", "texto": "Estimados, les comparto el acta de la reunion de ayer con los acuerdos y el responsable de cada punto. Les pido revisar y comentar antes del jueves para dejarla cerrada." },
+    { "id": "correo-05", "modo": "correo", "app": "Mail", "texto": "Don Patricio, muchas gracias por la confianza. Le confirmo que el equipo ya inicio el trabajo y le estare enviando un avance semanal todos los lunes." },
+    { "id": "correo-06", "modo": "correo", "app": "Mail", "texto": "Estimado equipo de soporte, les escribo porque la factura numero cuatro mil cuatrocientos once aparece cobrada dos veces en marzo. Agradeceria revisar y regularizar la situacion." },
+    { "id": "correo-07", "modo": "correo", "app": "Mail", "texto": "Hola Andrea, lamento informar que no podremos cumplir con la fecha original de entrega por un retraso de un tercero. Propongo mover la entrega al dia quince y compensar con dos semanas de soporte." },
+    { "id": "correo-08", "modo": "correo", "app": "Mail", "texto": "Estimada Javiera, quedo a la espera de los accesos al hosting para poder continuar con la migracion. Sin ellos el trabajo queda detenido a partir de manana." },
+
+    { "id": "chat-01", "modo": "chat", "app": "Slack", "texto": "oye equipo, voy a estar desconectado como una hora, tengo medico, cualquier cosa me escriben al celu" },
+    { "id": "chat-02", "modo": "chat", "app": "Slack", "texto": "ya quedo el fix en staging, pruebenlo y me dicen si sigue pasando lo del scroll" },
+    { "id": "chat-03", "modo": "chat", "app": "Slack", "texto": "alguien sabe por que el pipeline esta en rojo desde la manana? no alcance a mirarlo" },
+    { "id": "chat-04", "modo": "chat", "app": "Slack", "texto": "chiquillos, la reunion se corre pa las cuatro, el cliente pidio el cambio recien" },
+    { "id": "chat-05", "modo": "chat", "app": "Slack", "texto": "listo, ya mergie el pr, gracias por la review" },
+    { "id": "chat-06", "modo": "chat", "app": "Slack", "texto": "oye, me tinca que el problema esta en el cache y no en la query, dame media hora y les digo" },
+    { "id": "chat-07", "modo": "chat", "app": "Slack", "texto": "buena! quedo funcionando el deploy automatico, ya no hay que hacerlo a mano nunca mas" },
+    { "id": "chat-08", "modo": "chat", "app": "Slack", "texto": "sigo con el tema del sandbox, me esta costando mas de lo que pensaba, aviso apenas avance algo" },
+
+    { "id": "nota-01", "modo": "nota", "app": "Notas", "texto": "acordarme de pedir las credenciales del hosting antes del viernes, si no se cae el plazo" },
+    { "id": "nota-02", "modo": "nota", "app": "Notas", "texto": "idea: que el overlay se pueda arrastrar y quede pegado donde uno lo suelte, guardando la posicion entre sesiones" },
+    { "id": "nota-03", "modo": "nota", "app": "Notas", "texto": "comprar filamento pla negro y revisar si queda boquilla de cero coma cuatro de repuesto" },
+    { "id": "nota-04", "modo": "nota", "app": "Notas", "texto": "pendiente: renovar el dominio, vence en noviembre y nadie se acuerda nunca" },
+    { "id": "nota-05", "modo": "nota", "app": "Notas", "texto": "ojo con esto: el bug del scroll solo pasa en monitor externo, en el notebook no se reproduce" },
+    { "id": "nota-06", "modo": "nota", "app": "Notas", "texto": "leer el paper de mmbert antes de decidir el modelo, y anotar que idiomas cubre de verdad y cuales solo de nombre" },
+    { "id": "nota-07", "modo": "nota", "app": "Notas", "texto": "nota mental: la reunion de ayer quedo sin acta, mandar correo pidiendo los acuerdos" },
+    { "id": "nota-08", "modo": "nota", "app": "Notas", "texto": "probar si el respaldo de las tres de la manana esta corriendo, la ultima vez fallo y nadie se dio cuenta" },
+
+    { "id": "terminal-01", "modo": "terminal", "app": "Terminal", "texto": "git checkout menos be rama spec dilo mac nativo" },
+    { "id": "terminal-02", "modo": "terminal", "app": "Terminal", "texto": "dame un listado largo de la carpeta y ordenalo por fecha de modificacion" },
+    { "id": "terminal-03", "modo": "terminal", "app": "Terminal", "texto": "mata el proceso que esta ocupando el puerto tres mil" },
+    { "id": "terminal-04", "modo": "terminal", "app": "Terminal", "texto": "borra node modules y despues corre pnpm install y pnpm dev" },
+    { "id": "terminal-05", "modo": "terminal", "app": "Terminal", "texto": "buscame con grep todos los archivos que tengan la palabra api key, recursivo y sin mirar binarios" },
+    { "id": "terminal-06", "modo": "terminal", "app": "Terminal", "texto": "hazme un rsync de la carpeta de material al ese ese de dos, en modo espejo pero sin borrar lo que ya esta" },
+    { "id": "terminal-07", "modo": "terminal", "app": "Terminal", "texto": "muestrame cuanto espacio queda en los discos, en formato legible" },
+    { "id": "terminal-08", "modo": "terminal", "app": "Terminal", "texto": "corre los tests con cargo pero solo los del modulo de audio, y con output verboso" }
+  ]
+}
