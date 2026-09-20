@@ -12,6 +12,17 @@ This file provides guidance to AI coding assistants working with code in this re
 
 > **Dilo** is a Spanish-first fork of [Handy](https://github.com/cjpais/Handy) (`upstream` remote). Product decisions live in `docs/superpowers/specs/`. Keep the Rust core close to upstream so `git merge upstream/main` stays cheap; brand/UI/default changes go in focused commits. All user-facing copy is Spanish-first (es locale is authored, not machine-translated — keep its voice: tuteo, direct, zero corporate filler).
 
+## ⏸️ Estado: congelado en 0.3.2 (2026-09-20)
+
+**Este repo no recibe más trabajo.** Dilo se reescribe como app nativa de Mac
+en `/Volumes/SSD 1/Dilo/mac/` (Swift, fork de Talkify); la dirección está en
+`docs/superpowers/specs/2026-09-20-dilo-mac-nativo-design.md`. Los specs de
+producto de este repo siguen siendo la fuente de las decisiones (modos,
+español, plataforma abierta, reuniones) y se portan leyéndolos, no leyendo
+el Rust. Lo único que se toca aquí: el README de congelamiento, y specs o
+bitácora mientras el repo nuevo no tenga los suyos. No proponer features,
+arreglos ni merges con upstream.
+
 ## Dirección de producto — plataforma conversacional abierta
 
 **Dilo es la pieza central open source**, no el cliente cautivo de un backend,

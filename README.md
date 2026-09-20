@@ -22,6 +22,14 @@
 
 ---
 
+> ## ⏸️ Esta versión está congelada en la 0.3.2
+>
+> **Dilo se está reescribiendo como app nativa de Mac** (Swift, solo Apple Silicon, macOS 26+): más rápida, más liviana, con el notch como escenario y un notetaker de reuniones que aspira a nada menos que Granola. La dirección y sus razones están en [`docs/superpowers/specs/2026-09-20-dilo-mac-nativo-design.md`](docs/superpowers/specs/2026-09-20-dilo-mac-nativo-design.md).
+>
+> Esta app (Tauri/Rust, fork de Handy) **sigue funcionando y se puede descargar**, pero no recibe más features ni arreglos. Si estás en Windows, Linux o un Mac Intel, es la versión para ti; si quieres lo mismo con más mantenimiento, [Handy](https://github.com/cjpais/handy) es el original y sigue vivo.
+>
+> _This build is frozen at 0.3.2. Dilo is being rewritten as a native Mac app; see the spec linked above. Windows/Linux/Intel users: this version keeps working, or use upstream [Handy](https://github.com/cjpais/handy)._
+
 ## Qué es Dilo
 
 Aprietas un atajo, hablas, sueltas. Tu dictado aparece escrito donde tengas el cursor: Cursor, Claude Code, el terminal, Slack, donde sea. Todo se procesa **en tu compu** — ni un byte de tu voz sale de tu máquina.
