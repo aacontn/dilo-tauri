@@ -144,16 +144,20 @@ de quién. Hoy todo eso o lo decide el atajo que apretaste o no existe.
 - Contrato `Decider`: recibe texto (+ contexto: app al frente, modo activo,
   últimas líneas) y una pregunta tipada (`choice` / `score` / `noul`);
   devuelve la respuesta con probabilidad. Nada más.
-- **Implementación 1, local y por defecto: Laya multilingüe en Core ML.**
-  Encoder de 322M (647 MB, descarga a pedido como los modelos de voz), una
-  pasada, ~5 ms en el Neural Engine. Offline, gratis, Apache 2.0, y
-  **reentrenable con los dictados y modos del propio usuario** — eso es
-  personalización que ningún proveedor de nube da. Trabajo propio: cargar el
-  `.mlpackage` desde Swift y el tokenizador de mmBERT (`swift-transformers`);
-  el puerto hoy se invoca solo desde Python.
-- **Implementación 0, sin descarga: FoundationModels con generación guiada**
-  (`@Generable` sobre un enum). Más lenta; es lo que decide antes de que el
-  usuario baje Laya, y el respaldo si Laya no rinde en español.
+- **Implementación 0, por defecto y sin modelo: reglas.** La app al frente
+  decide el modo; palabras clave desempatan. Medido 2026-09-20: acierta el
+  100 % del set de evaluación con la app y el 85 % sin ella, en 0,013 ms.
+  Cualquier modelo tiene que ganarle a esto para justificar su costo.
+- **Implementación 1, sin descarga: FoundationModels con generación guiada**
+  (`@Generable` sobre un enum). Sin medir todavía; entra cuando las reglas
+  no alcancen (texto ambiguo, app desconocida).
+- **Laya multilingüe en Core ML: no entra hoy.** Medido 2026-09-20
+  (§Verificación 5): 65 % de acierto en español con la app al frente, 42,5 %
+  sin ella; confunde `codigo` con `terminal` y `correo` con `nota`. La
+  integración Swift sí funciona (38 ms, deriva 0,00005 contra PyTorch), pero
+  el modelo no distingue lo que Dilo necesita distinguir. Se reabre solo con
+  **fine-tuning sobre dictados reales del usuario** (el notebook existe; la
+  prueba fue zero-shot) y contra una base de reglas que no sea trivial.
 - **Implementación 2, opcional: Jev** u otra nube compatible con
   `/v1/systemone` (el formato ya es un estándar de facto: Decider, kev y
   openjev-sglang lo hablan). Entra como proveedor EN LÍNEA con la misma
@@ -168,6 +172,30 @@ de quién. Hoy todo eso o lo decide el atajo que apretaste o no existe.
   por un LLM lento.
 - Lo que Jev **no** es: no genera, no oye audio, no reemplaza al cerebro de
   la conversación, no sirve para wake word ni diarización.
+
+### 8 · Lo que enseñó la primera prueba de Talkify (2026-09-20)
+
+Alfonso dictó diez minutos con Talkify en un Mac sin notch, teclado
+latinoamericano. Tres reglas de v1 salen de ahí:
+
+1. **El gatillo nunca es una tecla que en teclado latino escriba
+   símbolos.** El segundo idioma de Talkify se dispara con ⌥ derecha, que en
+   ISO-LatAm es AltGr (`@ # \ | { } [ ]`): dictando prompts arrancaba una
+   sesión en inglés a cada rato y el resultado salía mezclado. Defaults de
+   Dilo: `fn`/🌐 o una combinación con ⌘; nunca un modificador solo.
+2. **La píldora sin notch no tapa la barra de menús ni se parece al HUD del
+   sistema.** Talkify la dibuja encima de los status items
+   (`HUDNotchGeometry.swift`, `hudClearsMenuBar = 0`, issue #83) en la misma
+   franja donde macOS 27 pone el HUD de volumen. Dilo: debajo de la barra,
+   con mango, forma de onda y texto parcial — identidad propia.
+3. **Nunca tocar el volumen maestro del usuario.** "Duck other audio" baja la
+   salida al 20 % por Core Audio y macOS muestra su HUD de volumen cada vez.
+   Si algún día se silencia la música al dictar, se pausa la reproducción;
+   el volumen no se toca.
+
+Además: `es_CL`, `es_ES`, `es_MX` y `es_US` existen en SpeechAnalyzer y
+vienen instaladas; no hay es-419. La calidad del español con el idioma bien
+puesto **queda pendiente de la segunda prueba** (§Verificación 1).
 
 ## Alcance de v1
 
@@ -263,7 +291,19 @@ Ninguna tarea del plan se ejecuta hasta tener estos cuatro números:
    ¿5 ms de verdad? (c) FoundationModels guiado como base de comparación.
    Jev solo si Alfonso consigue acceso y quiere el cuarto número. Si Laya no
    entiende español, la implementación por defecto se queda en Apple. No
-   bloquea v1 (bloquea v1.5).
+   bloquea v1 (bloquea v1.5). **Hecho 2026-09-20: Laya no entra.** 40
+   dictados chilenos, 5 modos: **65 %** con app al frente (p media 0,62),
+   **42,5 %** sin ella; en inglés la misma pregunta sube a 77,5 %, así que
+   parte es el prompt en español, pero `codigo`→`terminal` cae igual.
+   Latencia M1: 138 ms CPU / 66 ms MPS en Python; **Swift + Core ML 38 ms,
+   40/40 idénticos** (deriva 0,00005). El bundle ANE da 7 ms pero topa en 96
+   tokens y su grafo recibe embeddings, no `input_ids`: 1–2 días para usarlo
+   desde Swift. Base trivial: **la app al frente acierta el 100 %** del set;
+   keywords 85 % sin app. Trampa: `swift-transformers` 0.1.24 ignora
+   `prepend_scheme: "always"` de Metaspace (deriva 0,196 sin parche). Set y
+   detalle en `docs/superpowers/spikes/2026-09-20-spike-5-laya-espanol.md`.
+   Limitación del set: es sintético y cada dictado trae su app "correcta";
+   sobreestima a las reglas. Aun así, Laya zero-shot no compite.
 
 Los resultados se pegan aquí, con fecha, antes de escribir el plan.
 
