@@ -34,7 +34,8 @@ la app: es que no parece un producto terminado.
 | Granola (referencia de notetaker) | transcript **Me/Them** (mic vs sistema), sin diarización en escritorio, **manda el audio a su proveedor**, no guarda audio, no acepta grabaciones |
 | Sandbox App Store | bloquea la API de Accesibilidad hacia otras apps "sin importar lo concedido"; pegar (pasteboard + Cmd+V sintético) y atajos (`CGEventTap` + Input Monitoring) sí funcionan. Precedente: TypeMeIt, dos builds |
 | Nube de voz | Gemini 3.8 Live ≈ US$0,01–0,02/min; OpenAI realtime 4–5×; Gemini 3.5 Transcribe US$0,005/min, diariza 8 |
-| Jev (TypeSafe AI, Diogo Almeida ex-OpenAI, lanzado 2026-09-19) | modelo "System One": texto → decisión tipada (`choice` hasta 255 opciones, `score` 2–10 niveles, `noul` sí/no) con probabilidades calibradas; 70–500 ms; US$0,042/MTok entrada, salida gratis; **solo nube, solo texto, acceso anticipado con lista de espera, español sin confirmar**; REST `POST /v1/systemone`, SDKs Python/JS, no Swift |
+| Jev (TypeSafe AI, Diogo Almeida ex-OpenAI, lanzado 2026-09-15) | modelo "System One": texto → decisión tipada (`choice` hasta 255 opciones, `score` 2–10 niveles, `noul` sí/no) con probabilidades calibradas; 70–500 ms; US$0,042/MTok entrada, salida gratis; **solo nube, solo texto, acceso anticipado con lista de espera, español sin confirmar**; REST `POST /v1/systemone`, SDKs Python/JS, no Swift |
+| Réplicas libres de Jev (todas de la semana del 15-sep) | **Laya** (Convai, Apache 2.0): encoder no autorregresivo, checkpoint **multilingüe mmBERT 322M / 647 MB, 100+ idiomas**, notebook de fine-tuning; **laya-coreml** (Apache 2.0, 204 ⭐): puerto validado a Core ML, **~5 ms P50 en el Neural Engine de un M3 Max**, macOS 15+, variante ANE limitada a 96 tokens, invocación solo desde Python por ahora. Otras: von (395M, inglés, 18 ms en Metal), Decider (Qwen3.5-2B, inglés), Open Jev (150M ModernBERT, inglés, se entrena en 30 min), Foq (8B ternario, 2,2 GB). Precedentes de uso: `typesafe-assist` (Home Assistant: orden hablada → intent), `computer-use-jev` (maneja apps de macOS por Accesibilidad) |
 
 ## Decisiones tomadas (con Alfonso)
 
@@ -143,12 +144,22 @@ de quién. Hoy todo eso o lo decide el atajo que apretaste o no existe.
 - Contrato `Decider`: recibe texto (+ contexto: app al frente, modo activo,
   últimas líneas) y una pregunta tipada (`choice` / `score` / `noul`);
   devuelve la respuesta con probabilidad. Nada más.
-- **Implementación 1, local y por defecto: FoundationModels con generación
-  guiada** (`@Generable` sobre un enum). Offline, gratis, más lenta.
-- **Implementación 2, opcional: Jev.** Dos órdenes de magnitud más rápido y
-  barato que un LLM para exactamente esto, y no puede alucinar una opción
-  que no existe. Entra como proveedor EN LÍNEA con la misma honestidad de
-  tarjeta que Gemini: el texto del dictado sale a un tercero para decidir.
+- **Implementación 1, local y por defecto: Laya multilingüe en Core ML.**
+  Encoder de 322M (647 MB, descarga a pedido como los modelos de voz), una
+  pasada, ~5 ms en el Neural Engine. Offline, gratis, Apache 2.0, y
+  **reentrenable con los dictados y modos del propio usuario** — eso es
+  personalización que ningún proveedor de nube da. Trabajo propio: cargar el
+  `.mlpackage` desde Swift y el tokenizador de mmBERT (`swift-transformers`);
+  el puerto hoy se invoca solo desde Python.
+- **Implementación 0, sin descarga: FoundationModels con generación guiada**
+  (`@Generable` sobre un enum). Más lenta; es lo que decide antes de que el
+  usuario baje Laya, y el respaldo si Laya no rinde en español.
+- **Implementación 2, opcional: Jev** u otra nube compatible con
+  `/v1/systemone` (el formato ya es un estándar de facto: Decider, kev y
+  openjev-sglang lo hablan). Entra como proveedor EN LÍNEA con la misma
+  honestidad de tarjeta que Gemini: el texto del dictado sale a un tercero
+  para decidir. Vale la pena solo si la nube demuestra ser más precisa que
+  Laya en español; hoy los benchmarks propios de Laya dicen lo contrario.
 - **Primer uso (v1.5): "un atajo, Dilo decide".** Un solo atajo y el modo se
   elige por app + contenido, como hace Wispr con el formato. Los atajos por
   modo se quedan para quien los prefiera.
@@ -189,10 +200,12 @@ no se publique. Nada de reuniones ni de voz más allá de los cimientos de §5.
    Alfonso: la píldora tiene que sentirse igual de bien que el notch.
 6. **Intel queda fuera.** Se acepta; el Tauri 0.3.2 sigue disponible para
    ellos, congelado.
-7. **Jev tiene dos semanas de vida y lista de espera.** Puede cambiar de
-   precio, de API o desaparecer. Por eso es la implementación 2 de un
-   contrato cuya implementación 1 es local y de Apple; si Jev se cae, Dilo
-   sigue decidiendo, más lento.
+7. **Todo el ecosistema "System One" tiene cinco días.** Jev está en lista
+   de espera; las réplicas libres publican benchmarks propios, sin auditoría.
+   Lo que no es hype: un encoder de 322M en Core ML es un clasificador
+   calibrado, técnica madura con etiqueta nueva. Por eso el contrato tiene
+   tres implementaciones y la de Apple no depende de nadie: si Laya o Jev
+   desaparecen, Dilo sigue decidiendo, más lento.
 
 ## Verificación pendiente (compuerta de entrada del plan)
 
@@ -212,11 +225,15 @@ Ninguna tarea del plan se ejecuta hasta tener estos cuatro números:
    disco, transcrita por SpeechAnalyzer flujo por flujo. ¿Se pierde algo?
    ¿Cuánto tarda el parcial en aparecer?
 
-5. **Jev en español, contra el on-device.** Con acceso al console: 30
-   dictados reales en español con la app al frente, pregunta `choice` "¿qué
-   modo aplica?" contra los modos de Alfonso. Medir acierto y latencia, y lo
-   mismo con FoundationModels guiado. Si Jev no entiende español, no entra.
-   No bloquea v1 (bloquea v1.5).
+5. **Laya multilingüe en español, desde Swift.** (a) 30 dictados reales en
+   español con la app al frente, pregunta `choice` "¿qué modo aplica?" contra
+   los modos de Alfonso, con `laya-multilingual` en Python: acierto y
+   latencia. (b) El mismo `.mlpackage` de `laya-coreml` cargado desde un
+   Swift de 50 líneas con el tokenizador de mmBERT: ¿mismo resultado?
+   ¿5 ms de verdad? (c) FoundationModels guiado como base de comparación.
+   Jev solo si Alfonso consigue acceso y quiere el cuarto número. Si Laya no
+   entiende español, la implementación por defecto se queda en Apple. No
+   bloquea v1 (bloquea v1.5).
 
 Los resultados se pegan aquí, con fecha, antes de escribir el plan.
 
