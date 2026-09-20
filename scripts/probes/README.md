@@ -11,6 +11,13 @@ contienen ni la imprimen. Correr con `bun <probe>.ts` desde esta carpeta.
 - `gc-probe.ts` — diarización + timestamps por `:generateContent` (la
   compuerta de entrada del spec de reuniones; 503 por congestión el día del
   lanzamiento). Necesita `reunion.wav` (lo genera `meeting-probe.ts`).
+- `gc-probe.py` — el mismo probe de diarización en Python 3.9 sin dependencias,
+  para máquinas sin bun. Lee la key del Llavero (`security
+  find-generic-password -a dilo -s dilo-gemini-api-key -w`, sale con código 2 si
+  falta) y genera sus propios audios de 2 y 5 hablantes con `say` en
+  `/Volumes/SSD2/scratch/dilo-probes/`. Correr: `python3
+  scripts/probes/gc-probe.py` (`--solo-audio` solo regenera los WAV).
+  Bitácora del port: `docs/superpowers/spikes/2026-09-20-spike-3-gemini-diarizacion.md`.
 
 Regenerar los audios (no se versionan):
 
