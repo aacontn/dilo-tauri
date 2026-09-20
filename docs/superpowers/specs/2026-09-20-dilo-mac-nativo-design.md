@@ -34,6 +34,7 @@ la app: es que no parece un producto terminado.
 | Granola (referencia de notetaker) | transcript **Me/Them** (mic vs sistema), sin diarización en escritorio, **manda el audio a su proveedor**, no guarda audio, no acepta grabaciones |
 | Sandbox App Store | bloquea la API de Accesibilidad hacia otras apps "sin importar lo concedido"; pegar (pasteboard + Cmd+V sintético) y atajos (`CGEventTap` + Input Monitoring) sí funcionan. Precedente: TypeMeIt, dos builds |
 | Nube de voz | Gemini 3.8 Live ≈ US$0,01–0,02/min; OpenAI realtime 4–5×; Gemini 3.5 Transcribe US$0,005/min, diariza 8 |
+| Jev (TypeSafe AI, Diogo Almeida ex-OpenAI, lanzado 2026-09-19) | modelo "System One": texto → decisión tipada (`choice` hasta 255 opciones, `score` 2–10 niveles, `noul` sí/no) con probabilidades calibradas; 70–500 ms; US$0,042/MTok entrada, salida gratis; **solo nube, solo texto, acceso anticipado con lista de espera, español sin confirmar**; REST `POST /v1/systemone`, SDKs Python/JS, no Swift |
 
 ## Decisiones tomadas (con Alfonso)
 
@@ -132,6 +133,31 @@ Se conserva todo lo que ya es de Dilo: locale `es` escrito a mano (tuteo,
 directo, cero relleno), muletillas del español, voseo y modismos, Spanglish
 técnico intacto. Es lo único que ningún fork de Handy ni de Talkify tiene.
 
+### 7 · Decisiones tipadas — contrato `Decider`
+
+Hay puntos de Dilo que son una **decisión**, no una generación: qué modo
+aplica a este dictado, si esto es texto para pegar o una orden para Dilo, si
+la persona terminó de hablar, si esta frase de la reunión es un compromiso y
+de quién. Hoy todo eso o lo decide el atajo que apretaste o no existe.
+
+- Contrato `Decider`: recibe texto (+ contexto: app al frente, modo activo,
+  últimas líneas) y una pregunta tipada (`choice` / `score` / `noul`);
+  devuelve la respuesta con probabilidad. Nada más.
+- **Implementación 1, local y por defecto: FoundationModels con generación
+  guiada** (`@Generable` sobre un enum). Offline, gratis, más lenta.
+- **Implementación 2, opcional: Jev.** Dos órdenes de magnitud más rápido y
+  barato que un LLM para exactamente esto, y no puede alucinar una opción
+  que no existe. Entra como proveedor EN LÍNEA con la misma honestidad de
+  tarjeta que Gemini: el texto del dictado sale a un tercero para decidir.
+- **Primer uso (v1.5): "un atajo, Dilo decide".** Un solo atajo y el modo se
+  elige por app + contenido, como hace Wispr con el formato. Los atajos por
+  modo se quedan para quien los prefiera.
+- **Segundo uso (v3): la puerta de comandos.** `noul`: ¿esto es una orden
+  para Dilo o texto? Es lo que hace que la voz actúe sin pasar cada frase
+  por un LLM lento.
+- Lo que Jev **no** es: no genera, no oye audio, no reemplaza al cerebro de
+  la conversación, no sirve para wake word ni diarización.
+
 ## Alcance de v1
 
 Dictado con motor doble, modos con atajo y proveedor, palabras propias,
@@ -163,6 +189,10 @@ no se publique. Nada de reuniones ni de voz más allá de los cimientos de §5.
    Alfonso: la píldora tiene que sentirse igual de bien que el notch.
 6. **Intel queda fuera.** Se acepta; el Tauri 0.3.2 sigue disponible para
    ellos, congelado.
+7. **Jev tiene dos semanas de vida y lista de espera.** Puede cambiar de
+   precio, de API o desaparecer. Por eso es la implementación 2 de un
+   contrato cuya implementación 1 es local y de Apple; si Jev se cae, Dilo
+   sigue decidiendo, más lento.
 
 ## Verificación pendiente (compuerta de entrada del plan)
 
@@ -181,6 +211,12 @@ Ninguna tarea del plan se ejecuta hasta tener estos cuatro números:
 4. **Una reunión real de Alfonso por dos flujos** (mic + tap), con WAV a
    disco, transcrita por SpeechAnalyzer flujo por flujo. ¿Se pierde algo?
    ¿Cuánto tarda el parcial en aparecer?
+
+5. **Jev en español, contra el on-device.** Con acceso al console: 30
+   dictados reales en español con la app al frente, pregunta `choice` "¿qué
+   modo aplica?" contra los modos de Alfonso. Medir acierto y latencia, y lo
+   mismo con FoundationModels guiado. Si Jev no entiende español, no entra.
+   No bloquea v1 (bloquea v1.5).
 
 Los resultados se pegan aquí, con fecha, antes de escribir el plan.
 
