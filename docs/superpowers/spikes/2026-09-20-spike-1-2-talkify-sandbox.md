@@ -96,6 +96,37 @@ debería seguir actualizándose; no se probó una actualización real. Lo que ha
 - WAV del tap sandboxed: `~/Library/Containers/com.dilo.tapspike.sandboxed/Data/tap.wav`
 - En `spike/sandbox`: `Talkify-Sandboxed.entitlements` y el `Debug` del target con `ENABLE_APP_SANDBOX = YES`. `Release` queda intacto y sin sandbox.
 
+## Idioma y píldora sin notch
+
+**No fue el motor: fue el segundo gatillo.** `defaults read com.tgomareli.Talkify` da
+`recognitionLocale = es_CL` y `recognitionLocaleSecondary = en_US`. El segundo idioma viene apagado
+de fábrica, así que lo encendió él, y su gatillo por defecto es `KeyBindings.rightOptionTrigger`
+(`Input/KeyBindings.swift:94`, keyCode 61, **⌥ derecha**) — que en teclado latinoamericano es AltGr,
+la tecla de `@ # \ | { } [ ]`. Dictando prompts y terminal se aprieta a cada rato, y cada vez arranca
+una sesión **en inglés**. Eso es "mitad en inglés"; el resto lo transcribe es_CL, ya instalado.
+
+**Idioma por defecto:** `recognitionLocale` vacío → `defaultLocale()` (`SpeechRecognitionService.swift:400-415`)
+resuelve `supportedLocale(equivalentTo: .current)`, con en-US de respaldo. Acá `Locale.current = es_CL`, así
+que el default ya era español. No hay detección automática: Apple Speech transcribe **un idioma por sesión**.
+
+**Variantes en esta máquina** (`/Volumes/SSD2/scratch/speech-locales/` imprime `supportedLocales`
+e `installedLocales`): de 45 locales soportados, en español hay **es_CL, es_ES, es_MX, es_US — las
+cuatro ya instaladas**. No existe es-419 (`equivalentTo: es-419` cae en es_CL). `DictationTranscriber`
+ofrece las mismas cuatro. **No hay nada que descargar**: `AssetInventory` no va a pedir un asset.
+
+**Arreglo, un solo gatillo:** Ajustes → *Language* → "Dictation language" = *Spanish (Chile)*;
+"Second language" = la primera opción vacía (**Off**). Si quiere conservar inglés, mover el
+"Second language trigger" a algo que no sea ⌥ derecha.
+
+**Píldora sin notch:** `CoreHUD/HUDNotchGeometry.swift:14,123-126,136-147`. Sin notch medido la
+píldora es un rectángulo negro de 185×32 centrado en `screen.frame.midX` y pegado al borde
+superior, **dibujado encima de la barra de menús** mientras `hudClearsMenuBar` sea false — y en
+los defaults de Alfonso vale 0. Tapa los status items que le queden debajo, el propio de Talkify
+incluido (issue #83 de upstream). El HUD de volumen de macOS 26+ también es una píldora en esa
+franja pero a la derecha: no se superponen, solo comparten franja y lenguaje visual. Se baja con
+Ajustes → *Appearance* → "Clear the menu bar on other displays". Para Dilo es decisión de diseño,
+no bug: el spec pide "píldora idéntica cuando no hay notch", y con dos 1080p sin notch ese es el caso normal.
+
 ## Reproducir
 
 Xcode 27 recién instalado pide `xcodebuild -runFirstLaunch` y `xcodebuild -downloadComponent
