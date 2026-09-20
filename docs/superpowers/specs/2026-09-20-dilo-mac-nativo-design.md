@@ -32,6 +32,7 @@ la app: es que no parece un producto terminado.
 | Talkify (MIT, 554 ⭐, un autor, release semanal) | Swift 6, SpeechAnalyzer + FoundationModels, notch propio en `CoreHUD/`, pegado por AX/CGEvent/pasteboard, reducer testeable, ~11k líneas, única dependencia Sparkle |
 | Yap (MIT) | dictado Mac con SpeechAnalyzer en ~3k líneas, 4 MB, 60 MB en reposo |
 | Granola (referencia de notetaker) | transcript **Me/Them** (mic vs sistema), sin diarización en escritorio, **manda el audio a su proveedor**, no guarda audio, no acepta grabaciones |
+| El campo "dictado + reuniones en Mac, local" (visto 2026-09-20) | **Aside** (heyaside.com, cerrado, un autor, macOS 26+, Whisper local, hablantes al terminar + nombres desde la invitación del calendario, notas en Markdown, servidor MCP, US$8/mes o US$79 de por vida) es la referencia de posicionamiento y diseño. Abiertos y **MIT**: **meeting-transcriber** (Swift 6.2, 178 ⭐, 1.782 commits, CI/E2E; detecta Teams/Zoom/Webex/Meet por título de ventana + uso del micrófono, `CATapDescription`, WhisperKit o Parakeet v3, diarización por pista con FluidAudio, español, macOS 14.2+), **Humla** (Tauri + sidecars Swift, 287 ⭐, **noruego-primero**: el mismo playbook que Dilo con el español; fusiona notas escritas + transcript con etiquetas de procedencia; FTS5 + embeddings para "pregúntale a tus notas"), **Hark** (Swift + Rust por UniFFI, Parakeet en ANE, MCP). **AGPL, solo mirar:** next-notes (Swift 6, SpeechAnalyzer por defecto + Parakeet, tarjeta en el notch y cápsula bajo la barra en otros monitores, panel no activante) |
 | Sandbox App Store | bloquea la API de Accesibilidad hacia otras apps "sin importar lo concedido"; pegar (pasteboard + Cmd+V sintético) y atajos (`CGEventTap` + Input Monitoring) sí funcionan. Precedente: TypeMeIt, dos builds |
 | Nube de voz | Gemini 3.8 Live ≈ US$0,01–0,02/min; OpenAI realtime 4–5×; Gemini 3.5 Transcribe US$0,005/min, diariza 8 |
 | Jev (TypeSafe AI, Diogo Almeida ex-OpenAI, lanzado 2026-09-15) | modelo "System One": texto → decisión tipada (`choice` hasta 255 opciones, `score` 2–10 niveles, `noul` sí/no) con probabilidades calibradas; 70–500 ms; US$0,042/MTok entrada, salida gratis; **solo nube, solo texto, acceso anticipado con lista de espera, español sin confirmar**; REST `POST /v1/systemone`, SDKs Python/JS, no Swift |
@@ -306,6 +307,23 @@ Ninguna tarea del plan se ejecuta hasta tener estos cuatro números:
    sobreestima a las reglas. Aun así, Laya zero-shot no compite.
 
 Los resultados se pegan aquí, con fecha, antes de escribir el plan.
+
+## Notas para el spec de v2 (reuniones), a raíz del campo
+
+- **Base MIT para reuniones: `pasrom/meeting-transcriber`.** Detección de
+  reunión (título de ventana + micrófono en uso), captura por
+  `CATapDescription` en dos pistas, diarización por pista con FluidAudio.
+  Son 1.782 commits de casos borde ya pagados; se porta al fork como se
+  porta Talkify, con atribución. No reinventar.
+- **Nombres sin diarizar:** en 1:1, el otro nombre sale de la invitación del
+  calendario (truco de Aside). "Yo / Ellos" pasa a "Yo / Camila" gratis.
+- **Fusión notas + transcript** con etiquetas de procedencia (`[Notas]`
+  escritas por la persona, `[Transcript]` automático), como Humla: es lo que
+  hace que la salida sea *tus* notas y no un transcript.
+- **Servidor MCP de solo lectura** sobre reuniones y dictados: Aside, Hark y
+  Humla lo traen; encaja con el spec de plataforma abierta (Dilo como
+  interfaz para agentes) y cuesta poco.
+- **Nadie tiene la capa hablada.** Es lo único del mapa que sigue vacío.
 
 ## Fuera de alcance
 
