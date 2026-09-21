@@ -1,7 +1,7 @@
 # Prueba manual del camino de firma macOS (certificado estable "Dilo Signing")
 # sin cortar un release: buildea solo Apple Silicon y sube el bundle como
 # artifact para inspeccionar la firma. Despachar con:
-#   gh workflow run test-macos-signing.yml --repo aacontn/dilo
+#   gh workflow run test-macos-signing.yml --repo aacontn/dilo-tauri
 name: "Test macOS signing"
 
 on: workflow_dispatch

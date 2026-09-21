@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/aacontn/dilo/releases/latest">⬇️ Descargar</a> ·
+  <a href="https://github.com/aacontn/dilo-tauri/releases/latest">⬇️ Descargar</a> ·
   <a href="#cómo-funciona">Cómo funciona</a> ·
   <a href="#modelos-y-cuánta-ram-usan">Modelos y RAM</a> ·
   <a href="#compilar-desde-el-código">Compilar</a> ·
@@ -48,10 +48,10 @@ Si dictas tus prompts en vez de tipearlos, esto es para ti.
 **macOS y Linux — un comando y listo** (baja el último release, instala y resuelve los permisos solo; correrlo de nuevo actualiza):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aacontn/dilo/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/aacontn/dilo-tauri/main/install.sh | sh
 ```
 
-O baja el instalador para tu sistema desde **[Releases](https://github.com/aacontn/dilo/releases/latest)**.
+O baja el instalador para tu sistema desde **[Releases](https://github.com/aacontn/dilo-tauri/releases/latest)**.
 
 Los binarios v0.1.x van **sin firma de código** (la firma de Apple cuesta US$99/año; está en el roadmap). Tu sistema te va a advertir la primera vez — así se abre igual:
 
@@ -112,8 +112,8 @@ De regla, la RAM mientras dictas es **1,5 a 2 veces la descarga**. En reposo (mo
 
 ```bash
 # Requisitos: Rust estable + Bun
-git clone https://github.com/aacontn/dilo
-cd dilo
+git clone https://github.com/aacontn/dilo-tauri
+cd dilo-tauri
 bun install
 mkdir -p src-tauri/resources/models
 curl -o src-tauri/resources/models/silero_vad_v4.onnx https://blob.handy.computer/silero_vad_v4.onnx
@@ -174,4 +174,4 @@ Licencia [MIT](LICENSE).
 
 ## English
 
-**Dilo** ("say it" in Spanish) is a Spanish-first fork of [Handy](https://github.com/cjpais/Handy): free, open-source, fully offline push-to-talk dictation for macOS, Windows and Linux, aimed at Latin American developers who dictate their AI prompts instead of typing them. UI and docs are in Spanish; the app itself supports 22 UI languages and dozens of transcription languages. Lightweight by default: the model auto-unloads from RAM after 2 idle minutes (~60–80 MB at rest). Download from [Releases](https://github.com/aacontn/dilo/releases/latest) — binaries are unsigned for now (see the table above for how to open them).
+**Dilo** ("say it" in Spanish) is a Spanish-first fork of [Handy](https://github.com/cjpais/Handy): free, open-source, fully offline push-to-talk dictation for macOS, Windows and Linux, aimed at Latin American developers who dictate their AI prompts instead of typing them. UI and docs are in Spanish; the app itself supports 22 UI languages and dozens of transcription languages. Lightweight by default: the model auto-unloads from RAM after 2 idle minutes (~60–80 MB at rest). Download from [Releases](https://github.com/aacontn/dilo-tauri/releases/latest) — binaries are unsigned for now (see the table above for how to open them).

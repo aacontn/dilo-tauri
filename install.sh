@@ -1,7 +1,7 @@
 #!/bin/sh
 # Instalador CLI de Dilo — dictado por voz offline, en español.
 #
-#   curl -fsSL https://raw.githubusercontent.com/aacontn/dilo/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/aacontn/dilo-tauri/main/install.sh | sh
 #
 # Detecta tu sistema, baja el último release desde GitHub, lo instala y lo deja
 # listo para usar (en macOS incluye quitarle la cuarentena de Gatekeeper, que
@@ -9,7 +9,7 @@
 # Apple). Correrlo de nuevo actualiza a la última versión.
 set -eu
 
-REPO="aacontn/dilo"
+REPO="aacontn/dilo-tauri"
 API="https://api.github.com/repos/$REPO/releases/latest"
 
 say() { printf '%s\n' "$*"; }
